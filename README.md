@@ -18,7 +18,7 @@ npm install @m-zelinka/streak-counter
 
 ## Usage
 
-[![Demo](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/sandbox/streak-counter-7yl2w8)
+[![Demo](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/sandbox/streak-counter-demo-8d27ww?file=%2Fsrc%2FApp.tsx%3A2%2C23)
 
 ```ts
 import { streakCounter } from "@m-zelinka/streak-counter";
