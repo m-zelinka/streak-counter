@@ -12,7 +12,7 @@ This module is available in three formats:
 
 ## Install
 
-```
+```bash
 npm install @m-zelinka/streak-counter
 ```
 
