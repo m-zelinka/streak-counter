@@ -1,5 +1,6 @@
+import { STREAK_KEY, shouldIncrementOrResetStreakCount } from "./lib";
 import type { Streak } from "./types";
-import { STREAK_KEY, formatDate } from "./utils";
+import { formatDate } from "./utils";
 
 export function streakCounter(_localStorage: Storage, date: Date): Streak {
   const rawStreak = _localStorage.getItem(STREAK_KEY);
@@ -7,6 +8,22 @@ export function streakCounter(_localStorage: Storage, date: Date): Streak {
   if (rawStreak) {
     try {
       const streak = JSON.parse(rawStreak) as unknown as Streak;
+      const shouldIncrement = shouldIncrementOrResetStreakCount(
+        date,
+        streak.lastLoginDate
+      );
+
+      if (shouldIncrement === "increment") {
+        const updatedStreak: Streak = {
+          ...streak,
+          currentCount: streak.currentCount + 1,
+          lastLoginDate: formatDate(date),
+        };
+
+        _localStorage.setItem(STREAK_KEY, JSON.stringify(updatedStreak));
+
+        return updatedStreak;
+      }
 
       return streak;
     } catch (error) {

@@ -1,8 +1,9 @@
 import { JSDOM } from "jsdom";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { streakCounter } from "../src";
+import { STREAK_KEY } from "../src/lib";
 import type { Streak } from "../src/types";
-import { STREAK_KEY, formatDate } from "../src/utils";
+import { formatDate } from "../src/utils";
 
 describe("streakCounter", () => {
   let mockLocalStorage: Storage;
@@ -71,6 +72,31 @@ describe("streakCounter", () => {
       const streak = streakCounter(mockLocalStorage, date);
 
       expect(streak.startDate).toBe("12/12/2021");
+    });
+
+    it("increments the streak when login days are consecutive", () => {
+      const date = new Date("12/13/2021");
+      const streak = streakCounter(mockLocalStorage, date);
+
+      expect(streak.currentCount).toBe(2);
+    });
+
+    it("returns the streak with currentCount unchanged when login days are not consecutive", () => {
+      const date = new Date("12/14/2021");
+      const streak = streakCounter(mockLocalStorage, date);
+
+      expect(streak.currentCount).toBe(1);
+    });
+
+    it("saves the incremented streak to localStorage", () => {
+      const date = new Date("12/13/2021");
+      // Call it once so it updates the streak
+      streakCounter(mockLocalStorage, date);
+
+      const rawStreak = mockLocalStorage.getItem(STREAK_KEY);
+      const streak = JSON.parse(rawStreak ?? "") as unknown as Streak;
+
+      expect(streak.currentCount).toBe(2);
     });
   });
 });
