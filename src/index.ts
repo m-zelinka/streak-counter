@@ -8,15 +8,38 @@ export function streakCounter(_localStorage: Storage, date: Date): Streak {
   if (rawStreak) {
     try {
       const streak = JSON.parse(rawStreak) as unknown as Streak;
-      const shouldIncrement = shouldIncrementOrResetStreakCount(
+      const state = shouldIncrementOrResetStreakCount(
         date,
         streak.lastLoginDate
       );
 
-      if (shouldIncrement === "increment") {
+      if (state === "increment") {
         const updatedStreak: Streak = {
           ...streak,
           currentCount: streak.currentCount + 1,
+          lastLoginDate: formatDate(date),
+        };
+
+        _localStorage.setItem(STREAK_KEY, JSON.stringify(updatedStreak));
+
+        return updatedStreak;
+      }
+
+      if (state === "none") {
+        const updatedStreak: Streak = {
+          ...streak,
+          lastLoginDate: formatDate(date),
+        };
+
+        _localStorage.setItem(STREAK_KEY, JSON.stringify(updatedStreak));
+
+        return updatedStreak;
+      }
+
+      if (state === "reset") {
+        const updatedStreak: Streak = {
+          currentCount: 1,
+          startDate: formatDate(date),
           lastLoginDate: formatDate(date),
         };
 
@@ -31,7 +54,7 @@ export function streakCounter(_localStorage: Storage, date: Date): Streak {
     }
   }
 
-  const streak = {
+  const streak: Streak = {
     currentCount: 1,
     startDate: formatDate(date),
     lastLoginDate: formatDate(date),

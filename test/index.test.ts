@@ -68,20 +68,20 @@ describe("streakCounter", () => {
     });
 
     it("returns the streak from localStorage", () => {
-      const date = new Date();
+      const date = new Date("12/12/2021");
       const streak = streakCounter(mockLocalStorage, date);
 
       expect(streak.startDate).toBe("12/12/2021");
     });
 
-    it("increments the streak when login days are consecutive", () => {
+    it("increments the streak if login days are consecutive", () => {
       const date = new Date("12/13/2021");
       const streak = streakCounter(mockLocalStorage, date);
 
       expect(streak.currentCount).toBe(2);
     });
 
-    it("returns the streak with currentCount unchanged when login days are not consecutive", () => {
+    it("returns the streak with currentCount unchanged if login days are not consecutive", () => {
       const date = new Date("12/14/2021");
       const streak = streakCounter(mockLocalStorage, date);
 
@@ -97,6 +97,46 @@ describe("streakCounter", () => {
       const streak = JSON.parse(rawStreak ?? "") as unknown as Streak;
 
       expect(streak.currentCount).toBe(2);
+    });
+
+    it("reset the currentCount if login days are not consecutive", () => {
+      const date = new Date("12/13/2021");
+      const streak = streakCounter(mockLocalStorage, date);
+
+      expect(streak.currentCount).toBe(2);
+
+      // Skip a day and break the streak
+      const updatedDate = new Date("12/15/2021");
+      const updatedStreak = streakCounter(mockLocalStorage, updatedDate);
+
+      expect(updatedStreak.currentCount).toBe(1);
+    });
+
+    it("not reset the streak for same-day login", () => {
+      const date = new Date("12/13/2021");
+      // Call it once so it updates the streak
+      streakCounter(mockLocalStorage, date);
+
+      // Simulate same-day login
+      const updatedDate = new Date("12/13/2021");
+      const updatedStreak = streakCounter(mockLocalStorage, updatedDate);
+
+      expect(updatedStreak.currentCount).toBe(2);
+    });
+
+    it("saves the reset streak to localStorage", () => {
+      const date = new Date("12/13/2021");
+      // Call it once so it updates the streak
+      streakCounter(mockLocalStorage, date);
+
+      // Skip a day and break the streak
+      const updatedDate = new Date("12/15/2021");
+      streakCounter(mockLocalStorage, updatedDate);
+
+      const rawStreak = mockLocalStorage.getItem(STREAK_KEY);
+      const streak = JSON.parse(rawStreak ?? "") as unknown as Streak;
+
+      expect(streak.currentCount).toBe(1);
     });
   });
 });

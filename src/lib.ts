@@ -5,7 +5,7 @@ export const STREAK_KEY = "streak";
 export function shouldIncrementOrResetStreakCount(
   currentDate: Date,
   lastLoginDate: string
-): "increment" | undefined {
+): "increment" | "none" | "reset" {
   const diffInDays = differenceInDays(currentDate, new Date(lastLoginDate));
 
   if (diffInDays === 1) {
@@ -13,6 +13,10 @@ export function shouldIncrementOrResetStreakCount(
     return "increment";
   }
 
+  if (diffInDays === 0) {
+    return "none";
+  }
+
   // Otherwise they logged in after a day, which would break the streak
-  return undefined;
+  return "reset";
 }
