@@ -1,66 +1,61 @@
-import { STREAK_KEY, shouldIncrementOrResetStreakCount } from "./lib";
+import {
+  buildStreak,
+  doesStreakExist,
+  getNextCounterAction,
+  getSavedStreak,
+  saveStreak,
+} from "./lib";
 import type { Streak } from "./types";
-import { formatDate } from "./utils";
 
-export function streakCounter(_localStorage: Storage, date: Date): Streak {
-  const rawStreak = _localStorage.getItem(STREAK_KEY);
+export function streakCounter(localStorage_: Storage, date: Date): Streak {
+  const isStreakSaved = doesStreakExist(localStorage_);
+  if (isStreakSaved) {
+    const streak = getSavedStreak(localStorage_);
 
-  if (rawStreak) {
-    try {
-      const streak = JSON.parse(rawStreak) as unknown as Streak;
-      const state = shouldIncrementOrResetStreakCount(
-        date,
-        streak.lastLoginDate
-      );
+    // We have a streak in localStorage
+    // Find out the next step, based on the current date and the last login date
+    const nextAction = getNextCounterAction(
+      date,
+      new Date(streak.lastLoginDate)
+    );
 
-      if (state === "increment") {
-        const updatedStreak: Streak = {
-          ...streak,
-          currentCount: streak.currentCount + 1,
-          lastLoginDate: formatDate(date),
-        };
+    let updatedStreak = <Streak>{};
 
-        _localStorage.setItem(STREAK_KEY, JSON.stringify(updatedStreak));
-
-        return updatedStreak;
-      }
-
-      if (state === "none") {
-        const updatedStreak: Streak = {
-          ...streak,
-          lastLoginDate: formatDate(date),
-        };
-
-        _localStorage.setItem(STREAK_KEY, JSON.stringify(updatedStreak));
-
-        return updatedStreak;
-      }
-
-      if (state === "reset") {
-        const updatedStreak: Streak = {
-          currentCount: 1,
-          startDate: formatDate(date),
-          lastLoginDate: formatDate(date),
-        };
-
-        _localStorage.setItem(STREAK_KEY, JSON.stringify(updatedStreak));
-
-        return updatedStreak;
-      }
-
-      return streak;
-    } catch (error) {
-      console.error("Failed to parse streak from localStorage");
+    if (nextAction === "increment") {
+      // Here, login days are consecutive, so we update the currentCount
+      // Start date is left from previous streak
+      // Last login day is updated
+      updatedStreak = buildStreak(date, {
+        currentCount: streak.currentCount + 1,
+        startDate: streak.startDate,
+      });
     }
+
+    if (nextAction === "none") {
+      // Same-day login, keep the previous streak
+      // Start date is left from previous streak
+      updatedStreak = buildStreak(date, {
+        currentCount: streak.currentCount,
+        startDate: streak.startDate,
+      });
+    }
+
+    if (nextAction === "reset") {
+      // Login days are not consecutive
+      // Create a new streak
+      updatedStreak = buildStreak(date);
+    }
+
+    saveStreak(localStorage_, updatedStreak);
+
+    return updatedStreak;
   }
 
-  const streak: Streak = {
-    currentCount: 1,
-    startDate: formatDate(date),
-    lastLoginDate: formatDate(date),
-  };
+  // We don't have a streak in localStorage
+  // Create a new streak based on current date
+  const streak = buildStreak(date);
 
-  _localStorage.setItem(STREAK_KEY, JSON.stringify(streak));
+  saveStreak(localStorage_, streak);
 
   return streak;
 }
