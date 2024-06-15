@@ -1,18 +1,39 @@
 {
-  "name": "streak-counter",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "@m-zelinka/streak-counter",
+  "version": "0.0.1",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "source": "./src/index.ts",
+  "exports": {
+    "require": "./dist/index.cjs",
+    "default": "./dist/index.modern.js"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.module.js",
+  "unpkg": "./dist/index.umd.js",
+  "files": [
+    "./dist"
+  ],
   "scripts": {
+    "build": "microbundle",
+    "dev": "microbundle watch",
     "test": "vitest"
   },
   "prettier": {},
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "streak-counter"
+  ],
+  "author": "Marek Zelinka <mzelinka17@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m-zelinka/streak-counter"
+  },
+  "license": "MIT",
+  "description": "a streak counter inspired by Duolingo",
   "devDependencies": {
     "@types/jsdom": "^21.1.7",
     "jsdom": "^24.1.0",
+    "microbundle": "^0.15.1",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
   }
