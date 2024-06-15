@@ -27,6 +27,22 @@ describe("streakCounter", () => {
     expect(streak).toHaveProperty("lastLoginDate");
   });
 
+  it("returns a new streak if saved one is invalid", () => {
+    const invalidStreak = {
+      currentCount: "1",
+      startDate: "today",
+      lastLoginDate: 15,
+    };
+    mockLocalStorage.setItem(STREAK_KEY, JSON.stringify(invalidStreak));
+
+    const today = new Date();
+    // We should get a new streak, with date set to current
+    const streak = streakCounter(mockLocalStorage, today);
+
+    const formattedDate = formatDate(today);
+    expect(streak.startDate).toBe(formattedDate);
+  });
+
   it("returns a streak with currentCount starting at 1 and keep track of lastLoginDate", () => {
     const date = new Date();
     const streak = streakCounter(mockLocalStorage, date);
