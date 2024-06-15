@@ -1,7 +1,8 @@
 import { JSDOM } from "jsdom";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { streakCounter } from "../src";
-import { formatDate } from "../src/utils";
+import type { Streak } from "../src/types";
+import { STREAK_KEY, formatDate } from "../src/utils";
 
 describe("streakCounter", () => {
   let mockLocalStorage: Storage;
@@ -10,6 +11,10 @@ describe("streakCounter", () => {
     const mockJSDOM = new JSDOM("", { url: "https://localhost" });
 
     mockLocalStorage = mockJSDOM.window.localStorage;
+  });
+
+  afterEach(() => {
+    mockLocalStorage.clear();
   });
 
   it("returns a streak object with currentCount, startDate and lastLoginDate", () => {
@@ -29,5 +34,43 @@ describe("streakCounter", () => {
 
     expect(streak.currentCount).toBe(1);
     expect(streak.lastLoginDate).toBe(formattedDate);
+  });
+
+  it("stores the streak in localStorage", () => {
+    const date = new Date();
+    streakCounter(mockLocalStorage, date);
+
+    const rawStreak = mockLocalStorage.getItem(STREAK_KEY);
+    expect(rawStreak).not.toBeNull();
+  });
+
+  describe("with a pre-populated streak", () => {
+    let mockLocalStorage: Storage;
+
+    beforeEach(() => {
+      const mockJSDOM = new JSDOM("", { url: "https://localhost" });
+
+      mockLocalStorage = mockJSDOM.window.localStorage;
+
+      const date = new Date("12/12/2021");
+      const streak: Streak = {
+        currentCount: 1,
+        startDate: formatDate(date),
+        lastLoginDate: formatDate(date),
+      };
+
+      mockLocalStorage.setItem(STREAK_KEY, JSON.stringify(streak));
+    });
+
+    afterEach(() => {
+      mockLocalStorage.clear();
+    });
+
+    it("returns the streak from localStorage", () => {
+      const date = new Date();
+      const streak = streakCounter(mockLocalStorage, date);
+
+      expect(streak.startDate).toBe("12/12/2021");
+    });
   });
 });
